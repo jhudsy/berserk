@@ -76,3 +76,8 @@ class RatingHistory(Model):
 
 class PuzzleActivity(Model):
     date = utils.datetime_from_millis
+
+class BulkPairing(Model):
+    pairAt = utils.datetime_from_millis
+    startClocksAt = utils.datetime_from_millis
+    schedulAt = utils.datetime_from_millis

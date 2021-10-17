@@ -15,6 +15,7 @@ __all__ = [
     'Bots',
     'Broadcasts',
     'Challenges',
+    'Bulk',
     'Games',
     'Simuls',
     'Studies',
@@ -66,6 +67,7 @@ class Client(BaseClient):
     - :class:`broadcasts <berserk.clients.Broadcasts>` - getting and creating
       broadcasts
     - :class:`challenges <berserk.clients.Challenges>` - using challenges
+    - :class:`bulk <berserk.clients.Bulk>` - bulk creation of games
     - :class:`games <berserk.clients.Games>` - getting and exporting games
     - :class:`simuls <berserk.clients.Simuls>` - getting simultaneous
       exhibition games
@@ -93,6 +95,7 @@ class Client(BaseClient):
         self.teams = Teams(session, base_url)
         self.games = Games(session, base_url, pgn_as_default=pgn_as_default)
         self.challenges = Challenges(session, base_url)
+        self.bulk = Bulk(session, base_url)
         self.board = Board(session, base_url)
         self.bots = Bots(session, base_url)
         self.tournaments = Tournaments(session, base_url,
@@ -632,6 +635,65 @@ class Challenges(BaseClient):
         """
         path = f'api/challenge/{challenge_id}/decline'
         return self._r.post(path)['ok']
+
+class Bulk(BaseClient):
+    """Client for creating bulk challenges."""
+
+    def view_bulk_pairings(self):
+        """get a list of bulk pairings that were created.
+
+        :return: upcoming bulk pairings
+        :rtype: dict
+        """
+        path = f'api/bulk_pairing'
+        return self._r.get(path, converter = models.BulkPairing.convert)
+
+    def create_bulk_pairing(self, players, clock_limit, clock_increment,
+                            pair_at, start_clocks_at, rated=False,
+                            variant=None, message=None):
+        """
+        create a bulk paring.
+
+        :param str players: a string of oauth token pairs separated by a colon (:). Each pair is separated by a ,. The first token of each pair is white, the second black.
+        :param int clock_limit: initial clock time in seconds
+        :param int clock_increment: clock increment in seconds per move
+        :param int pair_at: date at which game will be created; up to 24hr later.
+        :param int start_clocks_at: date at which clocks will be started
+        :param bool rated: whether the game is rated
+        :param str variant: game variant
+        :param str message: message to send to players
+        :return: the bulk paring
+        :rtype: dict
+        """
+        path = 'api/bulk_pairing'
+        payload = {
+            'players': players,
+            'clock_limit': clock_limit,
+            'clock_increment': clock_increment
+            'pair_at': pair_at,
+            'start_clocks_at': start_clocks_at,
+            'rated': rated,
+            'variant': variant,
+            'message': message}
+        return self._r.post(path, json = payload,
+                            converter = models.BulkPairing.convert)
+
+    def manually_start_clocks(self, id):
+        """manually start a bulk pairing's clocks
+        :param int id: the id of the pairing
+        :return: whether the clocks were started
+        :rtype: bool"""
+
+        path = f'api/bulk_pairing/{id}/start-clocks'
+        return self._r.post(path)['ok']
+
+    def cancel_bulk_pairing(self, id):
+        """delete a bulk pairing
+        :param int id: the id of the pairing
+        :return: status
+        :rtype: bool"""
+        path = f'api/bulk_pairing/{id}'
+        return self._r.delete(path)['ok']
 
 
 class Board(BaseClient):

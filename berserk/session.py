@@ -62,6 +62,10 @@ class Requestor:
     def post(self, *args, **kwargs):
         """Convenience method to make a POST request."""
         return self.request('POST', *args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        """Convenience method to make a DELETE request."""
+        return self.request('DELETE', *args, **kwargs)
 
 
 class TokenSession(requests.Session):
