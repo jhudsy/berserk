@@ -669,7 +669,7 @@ class Bulk(BaseClient):
         payload = {
             'players': players,
             'clock_limit': clock_limit,
-            'clock_increment': clock_increment
+            'clock_increment': clock_increment,
             'pair_at': pair_at,
             'start_clocks_at': start_clocks_at,
             'rated': rated,
